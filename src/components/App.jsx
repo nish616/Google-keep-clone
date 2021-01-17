@@ -1,25 +1,49 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Note from "./Note";
 import CreateArea from "./CreateArea";
+import axios from "../axios";
 
 function App() {
   const [notes, setNotes] = useState([]);
 
-  function addNote(newNote) {
-    setNotes(prevNotes => {
-      return [...prevNotes, newNote];
-    });
-  }
+  useEffect(() => {
+    async function fetchData() {
+      const request =  await axios.get("/");
+      
+      setNotes(request.data);
+      return request;
+    }
+    fetchData().catch((err) => console.log(err));
+  });
 
-  function deleteNote(id) {
-    setNotes(prevNotes => {
-      return prevNotes.filter((noteItem, index) => {
-        return index !== id;
-      });
-    });
-  }
+  async function addNote(newNote) {
+    //console.log(newNote);
+     axios.post("/", {
+      title : newNote.title,
+      content : newNote.content
+    }, {
+     headers: {
+       'Content-Type': 'application/json'
+     }
+    }).then((res) => {console.log(res)}).catch((err) => {console.log(err)});
+ 
+ //addNote().catch((err) => console.log(err));
+  }   
+
+  async function deleteNote(noteId) {
+    //console.log(noteId);
+    axios.delete("/",{
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data : {
+        id : noteId
+      }
+     }).then((res) => console.log(res)).catch((err) => console.log(err));  
+
+    }
 
   return (
     <div>
@@ -29,7 +53,7 @@ function App() {
         return (
           <Note
             key={index}
-            id={index}
+            id={noteItem.id}
             title={noteItem.title}
             content={noteItem.content}
             onDelete={deleteNote}
