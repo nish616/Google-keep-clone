@@ -5,21 +5,23 @@ import Note from "./Note";
 import CreateArea from "./CreateArea";
 import axios from "../axios";
 
+
 function App() {
   const [notes, setNotes] = useState([]);
 
+  async function fetchData() {
+    const request =  await axios.get("/");
+    console.log(request);
+    setNotes(request.data.results);
+    return request;
+  }
   useEffect(() => {
-    async function fetchData() {
-      const request =  await axios.get("/");
-      
-      setNotes(request.data);
-      return request;
-    }
     fetchData().catch((err) => console.log(err));
-  });
+  },[]);
 
   async function addNote(newNote) {
     //console.log(newNote);
+    
      axios.post("/", {
       title : newNote.title,
       content : newNote.content
@@ -27,7 +29,12 @@ function App() {
      headers: {
        'Content-Type': 'application/json'
      }
-    }).then((res) => {console.log(res)}).catch((err) => {console.log(err)});
+    }).then((res) => {
+      console.log(res);
+      fetchData().catch((err) => console.log(err));
+    }).catch((err) => {
+      console.log(err)
+    });
  
  //addNote().catch((err) => console.log(err));
   }   
@@ -41,12 +48,16 @@ function App() {
       data : {
         id : noteId
       }
-     }).then((res) => console.log(res)).catch((err) => console.log(err));  
+     }).then((res) => {
+       console.log(res);
+       fetchData().catch((err) => console.log(err));
+      }).catch((err) => console.log(err));  
 
     }
 
   return (
     <div>
+      
       <Header />
       <CreateArea onAdd={addNote} />
       {notes.map((noteItem, index) => {
